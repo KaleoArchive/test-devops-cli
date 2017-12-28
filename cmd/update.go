@@ -21,15 +21,15 @@
 package cmd
 
 import (
-	"github.com/spf13/viper"
-	"fmt"
-	"strconv"
 	"bytes"
-	"strings"
 	"errors"
+	"fmt"
+	"github.com/spf13/viper"
+	"strconv"
+	"strings"
 
-	"github.com/spf13/cobra"
 	"github.com/hashicorp/go-version"
+	"github.com/spf13/cobra"
 )
 
 // updatenCmd represents the update-version command
@@ -42,7 +42,7 @@ func init() {
 	RootCmd.AddCommand(updateCmd)
 }
 
-func getSegments() ([]int64, error ){
+func getSegments() ([]int64, error) {
 	configVersion := viper.GetString("params.version")
 	if configVersion == "" {
 		return nil, errors.New("Can't get params.version from the config file")
@@ -56,7 +56,7 @@ func getSegments() ([]int64, error ){
 	return vs, nil
 }
 
-func segmentsToStrig(segments []int64)string {
+func segmentsToStrig(segments []int64) string {
 	var buf bytes.Buffer
 	fmtParts := make([]string, len(segments))
 	for i, s := range segments {
@@ -72,7 +72,7 @@ func writeVersion(newVersion string) {
 	viper.WriteConfig()
 }
 
-func updateVersion(versionFunc func([]int64) string)(string, error) {
+func updateVersion(versionFunc func([]int64) string) (string, error) {
 	s, err := getSegments()
 	if err != nil {
 		return "", err

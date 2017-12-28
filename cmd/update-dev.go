@@ -44,7 +44,7 @@ func init() {
 	updateCmd.AddCommand(updateDevCmd)
 }
 
-func devVersion(segments []int64) string{
-	segments[2] = segments[2] +1
+func devVersion(segments []int64) string {
+	segments[2] = segments[2] + 1
 	return segmentsToStrig(segments)
 }
