@@ -12,8 +12,11 @@ dev_baseurl="http://dev.kaleo.run"
 staging_baseurl="http://staging.kaleo.run"
 
 init(){
+    # Get site code
     git clone $site_repo $site_path
     git clone $site_theme_repo $site_path/themes/neo
+    # build test-devops-cli
+    make
 }
 
 # build accepts a branch name such as 'dev-gh-pages' or
