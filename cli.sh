@@ -49,6 +49,18 @@ build(){
     cd $current_path
 }
 
+build_dev(){
+    ./test-devops-cli --config=$site_config baseurl $dev_baseurl
+    build dev-gh-pages
+    ./test-devops-cli --config=$site_config baseurl $baseurl
+}
+
+build_staging(){
+    ./test-devops-cli --config=$site_config baseurl $staging_baseurl
+    build staging-gh-pages
+    ./test-devops-cli --config=$site_config baseurl $baseurl
+}
+
 # create_post where create a post with $1 as title and then
 # use the output of fortune command as the content.
 create_post(){
@@ -66,9 +78,7 @@ dev(){
     create_post $post_path
 
     version=$(./test-devops-cli --config=$site_config update dev)
-    ./test-devops-cli --config=$site_config baseurl $dev_baseurl
-    build dev-gh-pages
-    ./test-devops-cli --config=$site_config baseurl $baseurl
+    build_dev
 
     echo "Commmit and Push"
     cd $site_path
@@ -86,9 +96,7 @@ dev(){
 staging(){
 
     version=$(./test-devops-cli --config=$site_config update staging)
-    ./test-devops-cli --config=$site_config baseurl $staging_baseurl
-    build staging-gh-pages
-    ./test-devops-cli --config=$site_config baseurl $baseurl
+    build_staging
 
     echo "Commmit and Push"
     cd $site_path
@@ -106,9 +114,7 @@ staging(){
 
     ## After build staging, dev should also be updated.
 
-    ./test-devops-cli --config=$site_config baseurl $dev_baseurl
-    build dev-gh-pages
-    ./test-devops-cli --config=$site_config baseurl $baseurl
+    build_dev
     cd $site_path/public
     git add .
     git commit -m "Publish : $version"
