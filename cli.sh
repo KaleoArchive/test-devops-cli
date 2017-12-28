@@ -7,59 +7,97 @@ site_theme_repo="git@github.com:kaleocheng/test-devops-neo.git"
 site_path="../test-devops-site"
 site_config="$site_path/config.toml"
 current_path=$(pwd)
+baseurl="http://kaleo.run"
+dev_baseurl="http://dev.kaleo.run"
+staging_baseurl="http://staging.kaleo.run"
 
 init(){
     git clone $site_repo $site_path
     git clone $site_theme_repo $site_path/themes/neo
 }
 
-build_site(){
-    # Compile the site
-    echo "Compile the site"
+# build accepts a branch name such as 'dev-gh-pages' or
+# 'staging-gh-pages', it will be mounted to the 'public' by
+# 'git worktree', and then build the site.
+build(){
+    echo "Compile the site to $1"
     cd $site_path
+    ## 'rm -rf public' it is too dangerous, so we must check out the
+    # $site_path carefully.
+
+    # ensure $site_path has been set
+    if [[ -z ${site_path+x} ]]
+    then
+        echo "site_pathh has not been set"
+        exit 0
+    fi
+
+    # ensure $site_path is not empty
+    if [[ -z "$site_path" ]]
+    then
+        echo "site_path is empty"
+        exit 0
+    fi
+
+    rm -rf public
+    git worktree prune
+    git worktree add -B $1 public origin/$1
     hugo --theme=neo
     cd $current_path
 }
+
+# create_post where create a post with $1 as title and then
+# use the output of fortune command as the content.
+create_post(){
+    echo "Create a post: $1"
+    cd $site_path
+    hugo  new $1 && \
+    fortune >> content/$1 && \
+    hugo undraft content/$1
+    cd $current_path
+}
+
 dev(){
-    # Create a new post
-    echo "Create a new post"
     post_title=$(./test-devops-cli title)
     post_path="post/$post_title.md"
-    cd $site_path
-    hugo  new $post_path && \
-    fortune >> content/$post_path && \
-    hugo undraft content/$post_path
-    cd $current_path
+    create_post $post_path
 
-    # Increment the version
-    echo "Increment the version"
     version=$(./test-devops-cli --config=$site_config update dev)
+    ./test-devops-cli --config=$site_config baseurl $dev_baseurl
+    build dev-gh-pages
+    ./test-devops-cli --config=$site_config baseurl $baseurl
 
-    build_site
-
-    # Commit and Push
     echo "Commmit and Push"
     cd $site_path
     git add .
     git commit -m "Add new post: $post_title, version: $version"
     git push origin master
+
+    cd public/
+    git add .
+    git commit -m "Add new post: $post_title, version: $version"
+    git push origin dev-gh-pages
     cd $current_path
 }
 
 staging(){
-    # Increment the version
-    echo "Increment the version"
+
     version=$(./test-devops-cli --config=$site_config update staging)
+    ./test-devops-cli --config=$site_config baseurl $staging_baseurl
+    build staging-gh-pages
+    ./test-devops-cli --config=$site_config baseurl $baseurl
 
-    build_site
-
-    # Commit and Push
     echo "Commmit and Push"
     cd $site_path
     git add .
-    git commit -m "Update version: $version"
+    git commit -m "Publish: $version"
     git tag $version
     git push --tags origin master
+
+    cd public/
+    git add .
+    git commit -m "Publish : $version"
+    git push origin staging-gh-pages
     cd $current_path
 }
 
