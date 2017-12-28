@@ -102,6 +102,19 @@ staging(){
     git commit -m "Publish : $version"
     git push origin staging-gh-pages
     cd $current_path
+
+
+    ## After build staging, dev should also be updated.
+
+    ./test-devops-cli --config=$site_config baseurl $dev_baseurl
+    build dev-gh-pages
+    ./test-devops-cli --config=$site_config baseurl $baseurl
+    cd $site_path/public
+    git add .
+    git commit -m "Publish : $version"
+    git push origin dev-gh-pages
+
+    cd $current_path
 }
 
 # Print usage info
