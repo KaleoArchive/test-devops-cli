@@ -14,6 +14,7 @@ The script to create a post and publish the site for test-devops.
 
 Or just **vagrant**, All deps have been in Vagrantfile.
 
+> For testing purposes only，I uploaded a deploy key. ***You should nerver do this in a real project !***
 
 # Usage
 
@@ -28,7 +29,6 @@ $ vagrant ssh
 ```
 
 Init with `cli.sh`:
-> You need to have the permission (ssh key) to pull & push `test-devops-site` and `test-devops-neo`:
 ```shell
 $ cd $GOPATH/src/github.com/kaleocheng/test-devops-cli
 $ ./cli.sh init
@@ -44,8 +44,6 @@ Increment version by 0.1.0 and then commit & push:
 $ ./cli.sh staging
 ```
 
-> Also You need to have the permission to push.
-
 By default:
 ```shell
 git.username="Kaleo Cheng"
@@ -55,6 +53,17 @@ you could set to yours:
 ```shell
 $ git config --global user.name "Your name"
 $ git config --global user.email "your@email"
+```
+
+Automated task to run the create script:
+```shell
+$ crontab -e
+# Generate new page and push to github every 10 minutes
+*/10 * * * * eval "$(ssh-agent)" && ssh-add ~/.ssh/id_rsa && cd /home/ubuntu/workspace/src/github.com/kaleocheng/test-devops-cli && ./cli.sh dev
+
+# tag and push to github every 1 hour.
+0 * * * * eval "$(ssh-agent)" && ssh-add ~/.ssh/id_rsa && cd /home/ubuntu/workspace/src/github.com/kaleocheng/test-devops-cli && ./cli.sh staging
+
 ```
 
 For more details, use `help`:

@@ -8,6 +8,10 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "1000"
     vb.cpus = 1
+
+    # If you hit the DNS issue, uncomment the following line:
+    # See https://serverfault.com/questions/453185/vagrant-virtualbox-dns-10-0-2-3-not-working
+    # vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
   # Install git, hugo and fortune
@@ -18,6 +22,9 @@ Vagrant.configure("2") do |config|
     add-apt-repository ppa:git-core/ppa -y
     apt-get update
     apt-get install git hugo fortune-mod -y
+
+    # Can't find fortune when we use it in crontab, so just make a link.
+    ln -s /usr/games/fortune /usr/bin/fortune
   SHELL
   
   # Install Golang and some deps
@@ -32,4 +39,8 @@ Vagrant.configure("2") do |config|
 
   # Upload the init script
   config.vm.provision "file", source: "./init.sh", destination: "~/init.sh"
+
+  #####!!! Just for test, Never upload your ssh key to git !!!#####
+  config.vm.provision "file", source: "./test_rsa", destination: "~/.ssh/id_rsa"
+  config.vm.provision "file", source: "./test_rsa.pub", destination: "~/.ssh/id_rsa.pub"
 end
